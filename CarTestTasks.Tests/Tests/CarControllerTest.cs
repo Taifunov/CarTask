@@ -1,19 +1,19 @@
 using CarTestTask.Controllers;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CarTestTask.Services;
 using Moq;
 using Xunit;
-using CarTestTask;
-using CarTestTask.Tests;
 using System.Net.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using CarTestTask.Tests.Helpers;
-using CarTestTask.Tests.DbContext;
 using FluentAssertions;
 using System.Net;
+using CarTestTask.Models;
+using Newtonsoft.Json;
 
-namespace CarTestTasks.Tests.Tests
+namespace CarTestTask.Tests.Tests
 {
     public class CarControllerTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
@@ -43,14 +43,14 @@ namespace CarTestTasks.Tests.Tests
             var response = await _client.GetAsync(request.Url);
             var value = await response.Content.ReadAsStringAsync();
 
+            var result = JsonConvert.DeserializeObject<List<Car>>(value);
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            result.Count.Should().Be(8);
         }
 
         [Fact]
         public async Task CreateOrUpdate_ShouldUpdateJustDescription()
         {
-            var dbContext = DbContextMocker.GetCarsDbContext(nameof(CreateOrUpdate_ShouldUpdateJustDescription));
             // Arrange
             var request = new
             {
@@ -66,10 +66,11 @@ namespace CarTestTasks.Tests.Tests
             var response = await _client.PostAsync(request.Url, Utilities.GetStringContent(request.Body));
             var value = await response.Content.ReadAsStringAsync();
 
-           // Assert
-           response.EnsureSuccessStatusCode();
-           response.StatusCode.Should().Be(HttpStatusCode.OK);
-           value.Should().Contain("Volvo v.33");
+
+            var result = JsonConvert.DeserializeObject<Car>(value);
+
+            // Assert
+           result.Name.Should().BeEquivalentTo("Volvo v.33");
         }
 
         [Fact]
@@ -90,10 +91,10 @@ namespace CarTestTasks.Tests.Tests
             var response = await _client.PostAsync(request.Url, Utilities.GetStringContent(request.Body));
             var value = await response.Content.ReadAsStringAsync();
 
+            var result = JsonConvert.DeserializeObject<Car>(value);
+
             // Assert
-            response.EnsureSuccessStatusCode();
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-            value.Should().Contain("Best car");
+            result.Description.Should().BeEquivalentTo("Best car");
         }
         [Fact]
         public async Task CreateOrUpdate_ShouldCreateNewCar()
@@ -113,9 +114,9 @@ namespace CarTestTasks.Tests.Tests
             var response = await _client.PostAsync(request.Url, Utilities.GetStringContent(request.Body));
             var value = await response.Content.ReadAsStringAsync();
 
+            var result = JsonConvert.DeserializeObject<Car>(value);
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-            value.Should().NotBeNullOrEmpty();
+            result.Id.Should().NotBeNullOrEmpty();
         }
     }
 }

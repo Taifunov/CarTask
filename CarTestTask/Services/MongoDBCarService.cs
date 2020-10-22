@@ -19,7 +19,7 @@ namespace CarTestTask.Services
             _cars = database.GetCollection<Car>("Cars") ?? throw new ArgumentNullException(nameof(_cars));
         }
 
-        public async Task<Car> Create(CarDTO car)
+        private async Task<Car> Create(CarDTO car)
         {
             if (string.IsNullOrEmpty(car.Name))
                 throw new ArgumentNullException("Name is null or empty");
@@ -33,7 +33,7 @@ namespace CarTestTask.Services
             };
             await _cars.InsertOneAsync(carToCreate);
             return carToCreate;
-        }   
+        }
 
         public async Task<List<Car>> GetAllAsync() =>
             await _cars.Find(car => true).ToListAsync();
@@ -45,26 +45,26 @@ namespace CarTestTask.Services
             return result;
         }
 
-        public async Task Update(CarDTO car)
+        private async Task Update(CarDTO car)
         {
             Car carToUpdate = await FindAsync(car.Id);
             UpdateDefinition<Car>? update = null;
             if (!string.IsNullOrEmpty(car.Name))
             {
-               update = Builders<Car>.Update.Set(c => c.Name, car.Name);
+                update = Builders<Car>.Update.Set(c => c.Name, car.Name);
             }
 
             if (car.Description != "")
             {
-                update = update == null 
-                    ? Builders<Car>.Update.Set(c => c.Description, car.Description) 
+                update = update == null
+                    ? Builders<Car>.Update.Set(c => c.Description, car.Description)
                     : update.Set(c => c.Description, car.Description);
             }
             var filter = new BsonDocument("_id", car.Id);
             await _cars.UpdateOneAsync(filter, update);
         }
 
-        public async Task<Car> CreateorUpdateAsync(CarDTO car)
+        public async Task<Car> CreateOrUpdateAsync(CarDTO car)
         {
             Car result = null;
             if (car.Id == null)
@@ -72,11 +72,11 @@ namespace CarTestTask.Services
                 result = await Create(car);
             } else
             {
-              await Update(car);
+                await Update(car);
             }
             return result;
         }
- 
+
         public async Task DeleteAsync(string id) =>
             await _cars.DeleteOneAsync(car => car.Id == id);
     }

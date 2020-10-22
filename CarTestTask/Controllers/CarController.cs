@@ -10,54 +10,57 @@ namespace CarTestTask.Controllers
     [Route("api/[controller]")]
     public class CarController : ControllerBase
     {
-        private readonly IMongoDBCarService _carRepository;
-        private readonly IInMemoryCarService _inMemoryCarRepository;
+        private readonly IMongoDBCarService _mongoCarService;
+        private readonly IInMemoryCarService _inMemoryCarService;
 
-        public CarController(IMongoDBCarService carRepository, IInMemoryCarService inMemoryCarRepository)
+        public CarController(IMongoDBCarService mongoCarService, IInMemoryCarService inMemoryCarService)
         {
-            _carRepository = carRepository;
-            _inMemoryCarRepository = inMemoryCarRepository;
+            _mongoCarService = mongoCarService;
+            _inMemoryCarService = inMemoryCarService;
         }
 
         [HttpGet("getAll")]
         public async Task<IList<Car>> Get()
         {
-            return await _carRepository.GetAllAsync();
+            return await _mongoCarService.GetAllAsync();
         }
 
         [HttpGet("find/{id}", Name = "GetCar")]
-        public async Task<Car> FindByIdAsync([FromRoute] string id)
+        public async Task<ActionResult<Car>> FindByIdAsync([FromRoute] string id)
         {
-            return await _carRepository.FindAsync(id);
+            var car = await _mongoCarService.FindAsync(id);
+
+            if (car == null)
+            {
+                return NotFound();
+            }
+
+            return car;
         }
 
         [HttpDelete("{id}")]
         public async Task DeleteCardAsync([FromRoute] string id) =>
-            await _carRepository.DeleteAsync(id);
+            await _mongoCarService.DeleteAsync(id);
 
 
         [HttpPost("CreateOrUpdate")]
         public async Task<ActionResult> CreateOrUpdateAsync([FromBody] CarDTO model)
         {
-            await _carRepository.CreateorUpdateAsync(model);
+            await _mongoCarService.CreateOrUpdateAsync(model);
 
-            if (model != null)
-            {
-                return CreatedAtRoute("GetCar", new { id = model.Id }, model);
-            }
-            return Ok();
+            return CreatedAtRoute("GetCar", new { id = model.Id }, model);
         }
 
         [HttpPost("CreateOrUpdateForTest")]
         public async Task<Car> CreateOrUpdateForTest([FromBody] CarDTO car)
         {
-            return await _inMemoryCarRepository.CreateOrUpdateAsync(car);
+            return await _inMemoryCarService.CreateOrUpdateAsync(car);
         }
 
         [HttpGet("GetAllTest")]
         public async Task<List<Car>> GetTest()
         {
-            var result = await _inMemoryCarRepository.GetAllAsync();
+            var result = await _inMemoryCarService.GetAllAsync();
 
             return result;
         }

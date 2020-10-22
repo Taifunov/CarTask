@@ -8,7 +8,7 @@ namespace CarTestTask.Services
     {
         Task<List<Car>> GetAllAsync();
         Task<Car> FindAsync(string id);
-        Task<Car> CreateorUpdateAsync(CarDTO model);
+        Task<Car> CreateOrUpdateAsync(CarDTO model);
         Task DeleteAsync(string id);
     }
 }

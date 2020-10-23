@@ -63,8 +63,9 @@ namespace CarTestTask.Services
 
         public async Task<Car> FindAsync(string id)
         {
-            var result = await _context.Cars.Where(car => car.Id == id)
-               .FirstOrDefaultAsync();
+            var result = await _context.Cars
+                .FirstOrDefaultAsync(car => car.Id == id);
+
             return result;
         }
 
@@ -86,10 +87,12 @@ namespace CarTestTask.Services
         public async Task DeleteAsync(string id)
         {
             var currentCar = await FindAsync(id);
-            if (currentCar != null)
-            {
-                _context.Cars.Remove(currentCar);
-            }
+
+            if (currentCar == null)
+               throw new ArgumentNullException(nameof(currentCar));
+            
+
+            _context.Cars.Remove(currentCar);
 
             await _context.SaveChangesAsync();
         }

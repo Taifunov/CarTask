@@ -19,13 +19,15 @@ namespace CarTestTask.Controllers
             _inMemoryCarService = inMemoryCarService;
         }
 
-        [HttpGet("getAll")]
-        public async Task<IList<Car>> Get()
+        [HttpGet]
+        public async Task<ActionResult<IList<Car>>> Get()
         {
-            return await _mongoCarService.GetAllAsync();
+            var cars = await _mongoCarService.GetAllAsync();
+            
+            return Ok(cars);
         }
 
-        [HttpGet("find/{id}", Name = "GetCar")]
+        [HttpGet("{id}", Name = "GetCar")]
         public async Task<ActionResult<Car>> FindByIdAsync([FromRoute] string id)
         {
             var car = await _mongoCarService.FindAsync(id);
@@ -35,7 +37,7 @@ namespace CarTestTask.Controllers
                 return NotFound();
             }
 
-            return car;
+            return Ok(car);
         }
 
         [HttpDelete("{id}")]
@@ -43,12 +45,12 @@ namespace CarTestTask.Controllers
             await _mongoCarService.DeleteAsync(id);
 
 
-        [HttpPost("CreateOrUpdate")]
+        [HttpPost]
         public async Task<ActionResult> CreateOrUpdateAsync([FromBody] CarDTO model)
         {
             await _mongoCarService.CreateOrUpdateAsync(model);
 
-            return CreatedAtRoute("GetCar", new { id = model.Id }, model);
+            return CreatedAtRoute(nameof(FindByIdAsync), new { id = model.Id }, model);
         }
 
         [HttpPost("CreateOrUpdateForTest")]

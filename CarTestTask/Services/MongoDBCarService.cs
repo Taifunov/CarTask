@@ -36,7 +36,8 @@ namespace CarTestTask.Services
         }
 
         public async Task<List<Car>> GetAllAsync() =>
-            await _cars.Find(car => true).ToListAsync();
+            await _cars.Find(car => true)
+                .ToListAsync();
 
         public async Task<Car> FindAsync(string id)
         {
@@ -77,7 +78,12 @@ namespace CarTestTask.Services
             return result;
         }
 
-        public async Task DeleteAsync(string id) =>
+        public async Task DeleteAsync(string id)
+        {
+            if (id == null)
+                throw new ArgumentNullException(nameof(id));
+
             await _cars.DeleteOneAsync(car => car.Id == id);
+        }
     }
 }

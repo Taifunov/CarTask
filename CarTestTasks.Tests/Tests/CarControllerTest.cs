@@ -1,15 +1,11 @@
-using CarTestTask.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CarTestTask.Services;
-using Moq;
 using Xunit;
 using System.Net.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using CarTestTask.Tests.Helpers;
 using FluentAssertions;
-using System.Net;
 using CarTestTask.Models;
 using Newtonsoft.Json;
 
@@ -33,8 +29,6 @@ namespace CarTestTask.Tests.Tests
         [Fact]
         public async Task GetAllTest_ShouldReturnAllCars()
         {
-            var mockRepository = new Mock<IInMemoryCarService>();
-            var controller = new CarController(null, mockRepository.Object);
             var request = new
             {
                 Url = "/api/car/GetAllTest"
